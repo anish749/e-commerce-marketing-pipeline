@@ -1,0 +1,19 @@
+<workflow-app name="Setup Hive Databases and Tables" xmlns="uri:oozie:workflow:0.5">
+    <start to="setup_tables"/>
+    <action name="setup_tables">
+        <hive2 xmlns="uri:oozie:hive2-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <jdbc-url>jdbc:hive2://quickstart.cloudera:10000/default</jdbc-url>
+            <script>/code/hive/setup.hql</script>
+            <param>omniture_raw_path=${omniture_raw_path}</param>
+        </hive2>
+        <ok to="End"/>
+        <error to="Kill"/>
+    </action>
+    <kill name="Kill">
+        <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+    </kill>
+    <end name="End"/>
+</workflow-app>
+

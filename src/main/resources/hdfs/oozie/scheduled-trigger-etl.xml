@@ -1,0 +1,53 @@
+<coordinator-app name="Monitor File Arrival" frequency="60"
+                 start="${start_ts}" end="${end_ts}" timezone="Asia/Calcutta"
+                 xmlns="uri:oozie:coordinator:0.2">
+    <!--This is the frequency at which the coordinator monitors-->
+    <controls>
+        <timeout>10</timeout>
+        <concurrency>${concurrency_level}</concurrency>
+        <execution>${execution_order}</execution>
+        <throttle>${materialization_throttle}</throttle>
+    </controls>
+    <datasets>
+        <!--This is the frequency of dataset generation-->
+        <dataset name="din_omniture" frequency="60"
+                 initial-instance="${start_ts}" timezone="Asia/Calcutta">
+            <uri-template>${baseFsURI}/omniture/${YEAR}${MONTH}${DAY}_${HOUR}</uri-template>
+        </dataset>
+        <dataset name="din_sales" frequency="60"
+                 initial-instance="${start_ts}" timezone="Asia/Calcutta">
+            <uri-template>${baseFsURI}/sales/${YEAR}${MONTH}${DAY}_${HOUR}</uri-template>
+        </dataset>
+    </datasets>
+    <input-events>
+        <data-in name="input_omniture" dataset="din_omniture">
+            <instance>${coord:current(0)}</instance>
+        </data-in>
+        <data-in name="input_sales" dataset="din_sales">
+            <instance>${coord:current(0)}</instance>
+        </data-in>
+    </input-events>
+    <action>
+        <workflow>
+            <app-path>${wf_app_path}</app-path>
+            <configuration>
+                <property>
+                    <name>currentDate</name>
+                    <value>${coord:actualTime()}</value>
+                </property>
+                <property>
+                    <name>date_ts</name>
+                    <value>${coord:formatTime(coord:nominalTime(), "yyyyMMdd_HH")}</value>
+                </property>
+                <property>
+                    <name>omniture_raw_path</name>
+                    <value>${coord:dataIn('input_omniture')}</value>
+                </property>
+                <property>
+                    <name>sales_raw_path</name>
+                    <value>${coord:dataIn('input_sales')}</value>
+                </property>
+            </configuration>
+        </workflow>
+    </action>
+</coordinator-app>

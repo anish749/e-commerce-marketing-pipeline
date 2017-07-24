@@ -1,0 +1,10 @@
+<configuration>
+    <property>
+        <name>mapred.compress.map.output</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>topSpendersToAnalyze</name>
+        <value>25</value>
+    </property>
+</configuration>

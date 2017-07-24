@@ -1,0 +1,104 @@
+<workflow-app name="Prepare Data" xmlns="uri:oozie:workflow:0.5">
+    <start to="setup_tables"/>
+    <action name="setup_tables">
+        <hive2 xmlns="uri:oozie:hive2-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <jdbc-url>jdbc:hive2://quickstart.cloudera:10000/default</jdbc-url>
+            <script>/code/hive/read-hive.hql</script>
+            <param>omniture_raw_path=${omniture_raw_path}</param>
+            <param>date_ts=${date_ts}</param>
+        </hive2>
+        <ok to="PrepareOmnitureDataSpark"/>
+        <error to="Kill"/>
+    </action>
+
+    <!--<action name="PrepareOmnitureDataSpark">-->
+        <!--<spark xmlns="uri:oozie:spark-action:0.2">-->
+            <!--<job-tracker>${jobTracker}</job-tracker>-->
+            <!--<name-node>${nameNode}</name-node>-->
+            <!--<job-xml>${jobXml}</job-xml>-->
+            <!--<configuration>-->
+                <!--<property>-->
+                    <!--<name>mapred.compress.map.output</name>-->
+                    <!--<value>true</value>-->
+                <!--</property>-->
+            <!--</configuration>-->
+            <!--<master>yarn</master>-->
+            <!--<mode>client</mode>-->
+            <!--<name>PrepareOmnitureData</name>-->
+            <!--<class>org.anish.spark.jobs.PrepareOmnitureData</class>-->
+            <!--<jar>e-commerce-marketing-spark.jar</jar>-->
+            <!--<spark-opts>&#45;&#45;conf spark.yarn.am.memory=512m &#45;&#45;executor-memory 512m &#45;&#45;num-executors 1 &#45;&#45;driver-memory 512m</spark-opts>-->
+            <!--<arg>&#45;&#45;date_ts</arg>-->
+            <!--<arg>${date_ts}</arg>-->
+            <!--<file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>-->
+            <!--<file>${jobXml}#hive-site.xml</file>-->
+        <!--</spark>-->
+        <!--<ok to="Cleanup"/>-->
+        <!--<error to="Kill"/>-->
+    <!--</action>-->
+
+    <action name="PrepareOmnitureDataSpark">
+        <shell xmlns="uri:oozie:shell-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <job-xml>${jobXml}</job-xml>
+            <exec>spark-submit</exec>
+            <argument>--master</argument>
+            <argument>yarn-client</argument>
+            <argument>--class</argument>
+            <argument>org.anish.spark.jobs.PrepareOmnitureData</argument>
+            <argument>e-commerce-marketing-spark.jar</argument>
+            <argument>--date_ts</argument>
+            <argument>${date_ts}</argument>
+            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>${jobXml}#hive-site.xml</file>
+        </shell>
+        <ok to="Cleanup"/>
+        <error to="Kill"/>
+    </action>
+
+    <action name="PrepareSalesDataSpark">
+        <shell xmlns="uri:oozie:shell-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <job-xml>${jobXml}</job-xml>
+            <exec>spark-submit</exec>
+            <argument>--master</argument>
+            <argument>yarn-client</argument>
+            <argument>--packages</argument>
+            <argument>com.databricks:spark-csv_2.10:1.5.0</argument>
+            <argument>--class</argument>
+            <argument>org.anish.spark.jobs.PrepareSalesData</argument>
+            <argument>e-commerce-marketing-spark.jar</argument>
+            <argument>--rawSalesDataSource</argument>
+            <argument>${sales_raw_path}</argument>
+            <argument>--date_ts</argument>
+            <argument>${date_ts}</argument>
+            <argument>--topSpendersToAnalyze</argument>
+            <argument>${topSpendersToAnalyze}</argument>
+            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>${jobXml}#hive-site.xml</file>
+        </shell>
+        <ok to="Cleanup"/>
+        <error to="Kill"/>
+    </action>
+
+    <!--Clean up the success files at input to mark input is ingested-->
+    <action name="Cleanup">
+        <fs>
+            <delete path='${nameNode}/${sales_raw_path}/_SUCCESS'/>
+            <delete path='${nameNode}/${omniture_raw_path}/_SUCCESS'/>
+            <delete path='${nameNode}/${baseFsURI}/_SUCCESS'/>
+        </fs>
+        <ok to="End"/>
+        <error to="Kill"/>
+    </action>
+
+    <kill name="Kill">
+        <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+    </kill>
+    <end name="End"/>
+</workflow-app>
+
