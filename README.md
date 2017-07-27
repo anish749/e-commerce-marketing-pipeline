@@ -47,7 +47,8 @@ Once logged in to VM, run ```setupHdfs.sh``` to deploy suitable codes to HDFS, a
 ```NOTE:``` Oozie uses hive-site.xml as job-xml while running hive jobs. Here we place the hive-site.xml available to HDFS and link it to Oozie. In case hive-site is changed, you need to manually place this file again in HDFS.
 
 Run ```local/00_SetupHive.sh``` to trigger a Oozie workflow which creates Hive database and tables required for setup.
-Set start time and end time properties in ```oozie_coordinator.properties``` and submit the coordinator using ```10_SubmitCoordinator.properties```
+
+Set start time and end time properties in ```oozie_coordinator.properties``` and submit the coordinator using ```10_SubmitCoordinator.sh```
 The coordinator looks for files to arrive in HDFS and triggers the prepare-input-data workflow.
 
 Ingest some sample data using ```15_IngestData.sh```
@@ -65,6 +66,16 @@ These steps are:
  - Database processed = This is a temporary db where prepared data is stored.
  - Database warehouse = This is the final warehouse where data is partitioned by time (hr) and stored for analysts to query.
  
+### Querying processed data
+
+Log into the Spark Shell and use the following:
+```scala
+import org.apache.spark.sql.hive.HiveContext
+val hiveContext = new HiveContext(sc)
+hiveContext.table("warehouse.session_mapped").show
+hiveContext.table("warehouse.daily_top_spenders").show
+hiveContext.table("warehouse.daily_top_spenders_usage_logs").show
+```
 
 
-
+___
