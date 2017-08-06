@@ -1,4 +1,9 @@
 <configuration>
+    <!--The following configs affect all work flows in this folder-->
+    <property>
+        <name>oozie.launcher.mapreduce.map.java.opts</name>
+        <value>-XX:PermSize=512m -XX:MaxPermSize=512m</value>
+    </property>
     <property>
         <name>mapred.compress.map.output</name>
         <value>true</value>

@@ -9,113 +9,10 @@
             <param>omniture_raw_path=${omniture_raw_path}</param>
             <param>date_ts=${date_ts}</param>
         </hive2>
-        <ok to="PrepareOmnitureDataSpark_Shell"/>
+        <ok to="PrepareOmnitureDataSpark"/>
         <error to="Kill"/>
     </action>
 
-    <action name="PrepareOmnitureDataSpark_Shell">
-        <shell xmlns="uri:oozie:shell-action:0.1">
-            <job-tracker>${jobTracker}</job-tracker>
-            <name-node>${nameNode}</name-node>
-            <job-xml>${jobXml}</job-xml>
-            <exec>spark-submit</exec>
-            <argument>--master</argument>
-            <argument>yarn-client</argument>
-            <argument>--class</argument>
-            <argument>org.anish.spark.jobs.PrepareOmnitureData</argument>
-            <argument>e-commerce-marketing-spark.jar</argument>
-            <argument>--date_ts</argument>
-            <argument>${date_ts}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
-            <file>${jobXml}#hive-site.xml</file>
-        </shell>
-        <ok to="Cleanup"/>
-        <!--Ok to should contain PrepareSalesDataSpark_Shell to run the next action-->
-        <error to="Kill"/>
-    </action>
-
-    <action name="PrepareSalesDataSpark_Shell">
-        <shell xmlns="uri:oozie:shell-action:0.1">
-            <job-tracker>${jobTracker}</job-tracker>
-            <name-node>${nameNode}</name-node>
-            <job-xml>${jobXml}</job-xml>
-            <exec>spark-submit</exec>
-            <argument>--master</argument>
-            <argument>yarn-client</argument>
-            <argument>--packages</argument>
-            <argument>com.databricks:spark-csv_2.10:1.5.0</argument>
-            <argument>--class</argument>
-            <argument>org.anish.spark.jobs.PrepareSalesData</argument>
-            <argument>e-commerce-marketing-spark.jar</argument>
-            <argument>--rawSalesDataSource</argument>
-            <argument>${sales_raw_path}</argument>
-            <argument>--date_ts</argument>
-            <argument>${date_ts}</argument>
-            <argument>--topSpendersToAnalyze</argument>
-            <argument>${topSpendersToAnalyze}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
-            <file>${jobXml}#hive-site.xml</file>
-        </shell>
-        <ok to="MapSessionSales_Shell"/>
-        <error to="Kill"/>
-    </action>
-
-    <action name="MapSessionSales_Shell">
-        <shell xmlns="uri:oozie:shell-action:0.1">
-            <job-tracker>${jobTracker}</job-tracker>
-            <name-node>${nameNode}</name-node>
-            <job-xml>${jobXml}</job-xml>
-            <exec>spark-submit</exec>
-            <argument>--master</argument>
-            <argument>yarn-client</argument>
-            <argument>--packages</argument>
-            <argument>com.databricks:spark-csv_2.10:1.5.0</argument>
-            <argument>--driver-memory 2g --executor-memory 4g</argument>
-            <argument>--conf spark.sql.parquet.compression.codec=snappy</argument>
-            <argument>--conf spark.sql.parquet.filterPushdown=true</argument>
-            <argument>--conf spark.sql.parquet.mergeSchema=false</argument>
-            <argument>--conf spark.sql.parquet.filterPushdown=true</argument>
-            <argument>--conf spark.sql.hive.metastorePartitionPruning=true</argument>
-            <argument>--class org.anish.spark.jobs.MapSessionSales</argument>
-            <argument>e-commerce-marketing-spark.jar</argument>
-            <argument>--date_ts</argument>
-            <argument>${date_ts}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
-            <file>${jobXml}#hive-site.xml</file>
-        </shell>
-        <ok to="DailyTopSpenders_Shell"/>
-        <error to="Kill"/>
-    </action>
-    <action name="DailyTopSpenders_Shell">
-        <shell xmlns="uri:oozie:shell-action:0.1">
-            <job-tracker>${jobTracker}</job-tracker>
-            <name-node>${nameNode}</name-node>
-            <job-xml>${jobXml}</job-xml>
-            <exec>spark-submit</exec>
-            <argument>--master</argument>
-            <argument>yarn-client</argument>
-            <argument>--packages</argument>
-            <argument>com.databricks:spark-csv_2.10:1.5.0</argument>
-            <argument>--conf spark.sql.parquet.compression.codec=snappy</argument>
-            <argument>--conf spark.sql.parquet.filterPushdown=true</argument>
-            <argument>--conf spark.sql.parquet.mergeSchema=false</argument>
-            <argument>--conf spark.sql.parquet.filterPushdown=true</argument>
-            <argument>--conf spark.sql.hive.metastorePartitionPruning=true</argument>
-            <argument>--class org.anish.spark.jobs.DailyTopSpenders</argument>
-            <argument>e-commerce-marketing-spark.jar</argument>
-            <argument>--date_ts</argument>
-            <argument>${date_ts}</argument>
-            <argument>--topSpendersToAnalyze</argument>
-            <argument>${topSpendersToAnalyze}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
-            <file>${jobXml}#hive-site.xml</file>
-        </shell>
-        <ok to="Cleanup"/>
-        <error to="Kill"/>
-    </action>
-
-
-    <!--Example Spark Action - This is the ideal way of calling a Spark Job from Oozie-->
     <action name="PrepareOmnitureDataSpark">
         <spark xmlns="uri:oozie:spark-action:0.2">
             <job-tracker>${jobTracker}</job-tracker>
@@ -128,6 +25,83 @@
             <jar>e-commerce-marketing-spark.jar</jar>
             <arg>--date_ts</arg>
             <arg>${date_ts}</arg>
+            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>${jobXml}#hive-site.xml</file>
+        </spark>
+        <ok to="PrepareSalesDataSpark"/>
+        <error to="Kill"/>
+    </action>
+    <action name="PrepareSalesDataSpark">
+        <spark xmlns="uri:oozie:spark-action:0.2">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <job-xml>${jobXml}</job-xml>
+            <master>yarn</master>
+            <mode>client</mode>
+            <name>PrepareSalesData</name>
+            <class>org.anish.spark.jobs.PrepareSalesData</class>
+            <jar>e-commerce-marketing-spark.jar</jar>
+            <spark-opts>--packages com.databricks:spark-csv_2.10:1.5.0 --executor-memory 3G --num-executors 1</spark-opts>
+            <arg>--rawSalesDataSource</arg>
+            <arg>${sales_raw_path}</arg>
+            <arg>--date_ts</arg>
+            <arg>${date_ts}</arg>
+            <arg>--topSpendersToAnalyze</arg>
+            <arg>${topSpendersToAnalyze}</arg>
+            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>${jobXml}#hive-site.xml</file>
+        </spark>
+        <ok to="MapSessionSales"/>
+        <error to="Kill"/>
+    </action>
+
+    <action name="MapSessionSales">
+        <spark xmlns="uri:oozie:spark-action:0.2">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <job-xml>${jobXml}</job-xml>
+            <master>yarn</master>
+            <mode>client</mode>
+            <name>MapSessionSales</name>
+            <class>org.anish.spark.jobs.MapSessionSales</class>
+            <jar>e-commerce-marketing-spark.jar</jar>
+            <spark-opts>--packages com.databricks:spark-csv_2.10:1.5.0
+                --driver-memory 2g --executor-memory 4g
+                --conf spark.sql.parquet.compression.codec=snappy
+                --conf spark.sql.parquet.filterPushdown=true
+                --conf spark.sql.parquet.mergeSchema=false
+                --conf spark.sql.parquet.filterPushdown=true
+                --conf spark.sql.parquet.filterPushdown=true
+                --conf spark.sql.hive.metastorePartitionPruning=true</spark-opts>
+            <arg>--date_ts</arg>
+            <arg>${date_ts}</arg>
+            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>${jobXml}#hive-site.xml</file>
+        </spark>
+        <ok to="DailyTopSpenders"/>
+        <error to="Kill"/>
+    </action>
+    <action name="DailyTopSpenders">
+        <spark xmlns="uri:oozie:spark-action:0.2">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <job-xml>${jobXml}</job-xml>
+            <master>yarn</master>
+            <mode>client</mode>
+            <name>DailyTopSpenders</name>
+            <class>org.anish.spark.jobs.DailyTopSpenders</class>
+            <jar>e-commerce-marketing-spark.jar</jar>
+            <spark-opts>--packages com.databricks:spark-csv_2.10:1.5.0
+                --conf spark.sql.parquet.compression.codec=snappy
+                --conf spark.sql.parquet.filterPushdown=true
+                --conf spark.sql.parquet.mergeSchema=false
+                --conf spark.sql.parquet.filterPushdown=true
+                --conf spark.sql.parquet.filterPushdown=true
+                --conf spark.sql.hive.metastorePartitionPruning=true</spark-opts>
+            <arg>--date_ts</arg>
+            <arg>${date_ts}</arg>
+            <arg>--topSpendersToAnalyze</arg>
+            <arg>${topSpendersToAnalyze}</arg>
             <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </spark>

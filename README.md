@@ -72,10 +72,43 @@ Log into the Spark Shell and use the following:
 ```scala
 import org.apache.spark.sql.hive.HiveContext
 val hiveContext = new HiveContext(sc)
-hiveContext.table("warehouse.session_mapped").show
-hiveContext.table("warehouse.daily_top_spenders").show
-hiveContext.table("warehouse.daily_top_spenders_usage_logs").show
+val session_mapped = hiveContext.table("warehouse.session_mapped").show
+val top_spenders = hiveContext.table("warehouse.daily_top_spenders").show
+val top_spender_usage = hiveContext.table("warehouse.daily_top_spenders_usage_logs").show
 ```
 
+Other sample queries which can be made to the warehouse for insights
+```scala
+// Sessions which resulted in a sale
+session_mapped.filter('InvoiceNo isNotNull).show
+
+// Sessions which did not result in a sale
+session_mapped.filter('InvoiceNo isNull).show
+
+// Total invoices per sessions. (Here, it is more like the total different products sold in a session
+session_mapped
+  .filter('InvoiceNo isNotNull)
+  .groupBy('userid, 'sessionid)
+  .agg(count('InvoiceNo) as "totalInvoicesPerSession")
+  .sort('totalInvoicesPerSession.desc)
+  .show
+  
+// Distinct products sold in a session
+session_mapped
+  .filter('InvoiceNo isNotNull)
+  .groupBy('userid, 'sessionid)
+  .agg(collect_set('Description) as "productNames")
+  .show(truncate=false)
+```
+
+Insights from top spender usage logs
+```scala
+// Cities where sales are the highest on each day / hour
+top_spender_usage
+  .groupBy('date_ts, 'city)
+  .agg(sum('daily_spend) as "total_spend")
+  .sort('total_spend.desc)
+  .show
+```
 
 ___
