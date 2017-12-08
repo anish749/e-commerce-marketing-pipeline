@@ -4,8 +4,8 @@
         <hive2 xmlns="uri:oozie:hive2-action:0.1">
             <job-tracker>${jobTracker}</job-tracker>
             <name-node>${nameNode}</name-node>
-            <jdbc-url>jdbc:hive2://quickstart.cloudera:10000/default</jdbc-url>
-            <script>/code/hive/read-hive.hql</script>
+            <jdbc-url>${hiveJdbc}</jdbc-url>
+            <script>/user/ec2-user/code/hive/read-hive.hql</script>
             <param>omniture_raw_path=${omniture_raw_path}</param>
             <param>date_ts=${date_ts}</param>
         </hive2>
@@ -26,7 +26,7 @@
             <argument>e-commerce-marketing-spark.jar</argument>
             <argument>--date_ts</argument>
             <argument>${date_ts}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </shell>
         <ok to="Cleanup"/>
@@ -53,7 +53,7 @@
             <argument>${date_ts}</argument>
             <argument>--topSpendersToAnalyze</argument>
             <argument>${topSpendersToAnalyze}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </shell>
         <ok to="MapSessionSales_Shell"/>
@@ -80,7 +80,7 @@
             <argument>e-commerce-marketing-spark.jar</argument>
             <argument>--date_ts</argument>
             <argument>${date_ts}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </shell>
         <ok to="DailyTopSpenders_Shell"/>
@@ -107,7 +107,7 @@
             <argument>${date_ts}</argument>
             <argument>--topSpendersToAnalyze</argument>
             <argument>${topSpendersToAnalyze}</argument>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </shell>
         <ok to="Cleanup"/>
@@ -128,7 +128,7 @@
             <jar>e-commerce-marketing-spark.jar</jar>
             <arg>--date_ts</arg>
             <arg>${date_ts}</arg>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </spark>
         <ok to="Cleanup"/>

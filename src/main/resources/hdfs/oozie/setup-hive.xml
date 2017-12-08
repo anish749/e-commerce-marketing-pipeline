@@ -4,8 +4,8 @@
         <hive2 xmlns="uri:oozie:hive2-action:0.1">
             <job-tracker>${jobTracker}</job-tracker>
             <name-node>${nameNode}</name-node>
-            <jdbc-url>jdbc:hive2://quickstart.cloudera:10000/default</jdbc-url>
-            <script>/code/hive/setup.hql</script>
+            <jdbc-url>${hiveJdbc}</jdbc-url>
+            <script>/user/ec2-user/code/hive/setup.hql</script>
             <param>omniture_raw_path=${omniture_raw_path}</param>
         </hive2>
         <ok to="End"/>

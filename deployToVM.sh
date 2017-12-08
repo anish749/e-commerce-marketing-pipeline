@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-destIp=192.168.56.101
+destIp=ec2-13-126-212-129.ap-south-1.compute.amazonaws.com
 
 rm -rf build-files && \
 mvn clean package -DskipTests=true && \
 echo "Completed packaging, deploying to $destIp" && \
-scp -r build-files/* cloudera@$destIp:codeDrops/ && \
+scp -r build-files/* ec2-user@$destIp:codeDrops/ && \
 echo "Deployed in VM $destIp"
 
 exit 0
