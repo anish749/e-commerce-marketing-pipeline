@@ -1,8 +1,12 @@
 <configuration>
     <!--The following configs affect all work flows in this folder-->
     <property>
+        <name>oozie.launcher.yarn.app.mapreduce.am.resource.mb</name>
+        <value>2048</value>
+    </property>
+    <property>
         <name>oozie.launcher.mapreduce.map.java.opts</name>
-        <value>-XX:PermSize=512m -XX:MaxPermSize=512m</value>
+        <value>-XX:PermSize=1024m -XX:MaxPermSize=1024m</value>
     </property>
     <property>
         <name>mapred.compress.map.output</name>
@@ -11,5 +15,9 @@
     <property>
         <name>topSpendersToAnalyze</name>
         <value>25</value>
+    </property>
+    <property>
+        <name>spark.kryoserializer.buffer.max</name>
+        <value>512m</value>
     </property>
 </configuration>

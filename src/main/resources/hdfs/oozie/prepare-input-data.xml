@@ -4,8 +4,8 @@
         <hive2 xmlns="uri:oozie:hive2-action:0.1">
             <job-tracker>${jobTracker}</job-tracker>
             <name-node>${nameNode}</name-node>
-            <jdbc-url>jdbc:hive2://quickstart.cloudera:10000/default</jdbc-url>
-            <script>/code/hive/read-hive.hql</script>
+            <jdbc-url>${hiveJdbc}</jdbc-url>
+            <script>/user/ec2-user/code/hive/read-hive.hql</script>
             <param>omniture_raw_path=${omniture_raw_path}</param>
             <param>date_ts=${date_ts}</param>
         </hive2>
@@ -19,13 +19,13 @@
             <name-node>${nameNode}</name-node>
             <job-xml>${jobXml}</job-xml>
             <master>yarn</master>
-            <mode>client</mode>
+            <mode>cluster</mode>
             <name>PrepareOmnitureData</name>
             <class>org.anish.spark.jobs.PrepareOmnitureData</class>
             <jar>e-commerce-marketing-spark.jar</jar>
             <arg>--date_ts</arg>
             <arg>${date_ts}</arg>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </spark>
         <ok to="PrepareSalesDataSpark"/>
@@ -37,18 +37,18 @@
             <name-node>${nameNode}</name-node>
             <job-xml>${jobXml}</job-xml>
             <master>yarn</master>
-            <mode>client</mode>
+            <mode>cluster</mode>
             <name>PrepareSalesData</name>
             <class>org.anish.spark.jobs.PrepareSalesData</class>
             <jar>e-commerce-marketing-spark.jar</jar>
-            <spark-opts>--packages com.databricks:spark-csv_2.10:1.5.0 --executor-memory 3G --num-executors 1</spark-opts>
+            <spark-opts>--packages com.databricks:spark-csv_2.10:1.5.0 --driver-memory 3G --executor-memory 6G --num-executors 3</spark-opts>
             <arg>--rawSalesDataSource</arg>
             <arg>${sales_raw_path}</arg>
             <arg>--date_ts</arg>
             <arg>${date_ts}</arg>
             <arg>--topSpendersToAnalyze</arg>
             <arg>${topSpendersToAnalyze}</arg>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </spark>
         <ok to="MapSessionSales"/>
@@ -61,12 +61,13 @@
             <name-node>${nameNode}</name-node>
             <job-xml>${jobXml}</job-xml>
             <master>yarn</master>
-            <mode>client</mode>
+            <mode>cluster</mode>
             <name>MapSessionSales</name>
             <class>org.anish.spark.jobs.MapSessionSales</class>
             <jar>e-commerce-marketing-spark.jar</jar>
             <spark-opts>--packages com.databricks:spark-csv_2.10:1.5.0
                 --driver-memory 2g --executor-memory 4g
+                --conf spark.kryoserializer.buffer.mb=512
                 --conf spark.sql.parquet.compression.codec=snappy
                 --conf spark.sql.parquet.filterPushdown=true
                 --conf spark.sql.parquet.mergeSchema=false
@@ -75,7 +76,7 @@
                 --conf spark.sql.hive.metastorePartitionPruning=true</spark-opts>
             <arg>--date_ts</arg>
             <arg>${date_ts}</arg>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </spark>
         <ok to="DailyTopSpenders"/>
@@ -87,7 +88,7 @@
             <name-node>${nameNode}</name-node>
             <job-xml>${jobXml}</job-xml>
             <master>yarn</master>
-            <mode>client</mode>
+            <mode>cluster</mode>
             <name>DailyTopSpenders</name>
             <class>org.anish.spark.jobs.DailyTopSpenders</class>
             <jar>e-commerce-marketing-spark.jar</jar>
@@ -102,7 +103,7 @@
             <arg>${date_ts}</arg>
             <arg>--topSpendersToAnalyze</arg>
             <arg>${topSpendersToAnalyze}</arg>
-            <file>/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
+            <file>/user/ec2-user/code/spark/e-commerce-marketing-spark.jar#e-commerce-marketing-spark.jar</file>
             <file>${jobXml}#hive-site.xml</file>
         </spark>
         <ok to="Cleanup"/>
