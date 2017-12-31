@@ -1,4 +1,4 @@
-E commerce marketing Pipeline
+# E commerce marketing Pipeline
 ___
 
 An ETL module meant to be used for ingesting and storing data to data lakes which can be queried for analyzing data from time to time
@@ -6,6 +6,7 @@ This also has a feature to find users to send promotional mailers.
 
 This is made as an example use case only using data available in the public domain to showcase how work flows and data pipelines work in the Hadoop ecosystem with Oozie, Hive and Spark.
 
+Originally tested on Cloudera VM. Also tested on Cloudera Express cluser on AWS EC2. (See code from aws-ec2 branch)
 
 ### Data Sources used:
  - Web logs recorded by Omniture (Adobe Site Catalyst) 
