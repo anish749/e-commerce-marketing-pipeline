@@ -1,0 +1,3 @@
+Check https://stackoverflow.com/questions/47045446/oozies-spark-submit-uses-ivy-2-4-method-missing-in-cdh-5-9-2
+
+Replace jar accordingly before running Oozie on Cloudera
