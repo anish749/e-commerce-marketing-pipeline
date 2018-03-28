@@ -39,6 +39,8 @@ This is made as an example use case only using data available in the public doma
 rm -rf build-files && \
 mvn clean package
 ```
+##### Update ivy2 jars for this version of Cloudera
+Follow instructions [here](https://github.com/anish749/e-commerce-marketing-pipeline/blob/aws-ec2/cloudera-jar-replace/debug%20before%20running.txt) to replace ivy2 jar with the correct version. This is required because of a bug in cloudera VM.
 
 All jars, hive queries, oozie workflows and shell scripts required to run in VM are created in the build-files folder.
 Deploy these to VM. Alternatively create ~/codeDrops directory in VM and you can run deployToVM.sh from host machine, which would package and deploy to VM.
